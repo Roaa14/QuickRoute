@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QuickRoute - الشهادات الرقمية</title>
+    <title>QuickRoute - التحقق من الشهادات</title>
     <script src="https://cdn.tailwindcss.com"></script> 
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11,29 +11,27 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     
     <style>
+        /* تنسيقات CSS أساسية باستخدام خط القاهرة وتأثيرات الخلفية */
         body {
             font-family: 'Cairo', sans-serif;
-            /* تأكد من وجود صورة background.png في نفس مجلد الملف */
-            background-image: url('background.png');
-            background-size: 99% 100%;
+            background-color: #1a0f35;
+            background-image: url('background.png'); /* تأكد من وجود صورة */
+            background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
             background-attachment: fixed;
-            background-color: #1a0f35; /* لون خلفية احتياطي */
         }
         .glass-card {
-            /* تصميم الزجاج الشفاف */
-            background: rgba(30, 20, 60, 0.05);
-            backdrop-filter: blur(5px);
+            background: rgba(30, 20, 60, 0.15);
+            backdrop-filter: blur(8px);
             border: 1px solid rgba(170, 150, 255, 0.4);
             box-shadow: 0 8px 32px 0 rgba(103, 27, 161, 0.3);
         }
         .certificate {
-            /* تصميم الشهادة */
             border: 10px solid;
             border-image-slice: 1;
             border-image-source: linear-gradient(to left, #0891b2, #22d3ee);
-            background: rgba(15, 23, 42, 0.8);
+            background: rgba(15, 23, 42, 0.9);
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
         .seal {
@@ -60,7 +58,10 @@
 
         <div id="login-view" class="hidden"> 
             <div class="glass-card p-8 rounded-2xl shadow-lg max-w-md mx-auto">
-                <h1 class="text-4xl font-bold text-center mb-8 text-cyan-400">QuickRoute - الدخول</h1>
+                <h1 class="text-4xl font-bold text-center mb-2 text-cyan-400">QuickRoute - الدخول</h1>
+                <p id="login-info" class="text-center text-sm mb-6 text-gray-400">
+                    أدخل بيانات تسجيل الدخول الخاصة بك.
+                </p>
                 <form id="login-form" class="space-y-6">
                     <div>
                         <label for="username" class="block mb-2 font-semibold text-gray-300">اسم المستخدم</label>
@@ -79,9 +80,9 @@
         </div>
         
         <div id="generator-view" class="hidden">
-            <div class="glass-card p-8 rounded-2xl shadow-lg max-w-2xl mx-auto">
-                <h1 class="text-3xl font-bold text-center mb-2 text-cyan-400">لوحة تحكم الشهادات</h1>
-                <p class="text-center text-gray-400 mb-6">أدخل بيانات الشهادة لتوليد رمز QR للتحقق.</p>
+            <div class="glass-card p-8 rounded-2xl shadow-lg max-w-3xl mx-auto">
+                <h1 class="text-3xl font-bold text-center mb-2 text-cyan-400">لوحة تحكم المسؤول (إنشاء الشهادات)</h1>
+                <p class="text-center text-gray-400 mb-6">أدخل بيانات الشهادة وبيانات تسجيل الدخول للطالب لتوليد رمز QR.</p>
 
                 <div class="flex justify-between mb-8">
                     <button id="logout-button" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition">
@@ -109,6 +110,20 @@
                         <label for="issueDate" class="block mb-2 font-semibold text-gray-300">تاريخ الإصدار</label>
                         <input type="date" id="issueDate" class="w-full p-3 bg-gray-800 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition" required>
                     </div>
+
+                    <div class="pt-4 border-t border-gray-700">
+                        <h3 class="text-xl font-bold mb-4 text-indigo-400">بيانات دخول الطالب (للتحقق الخاص)</h3>
+                        <div>
+                            <label for="studentUsername" class="block mb-2 font-semibold text-gray-300">اسم مستخدم الطالب (فريد)</label>
+                            <input type="text" id="studentUsername" class="w-full p-3 bg-gray-800 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" placeholder="مثال: ahmed.ali2025" required>
+                        </div>
+                        <div class="mt-4">
+                            <label for="studentPassword" class="block mb-2 font-semibold text-gray-300">كلمة مرور الطالب</label>
+                            <input type="password" id="studentPassword" class="w-full p-3 bg-gray-800 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" required>
+                        </div>
+                        <p id="student-user-error" class="text-red-400 text-sm mt-2 hidden">اسم المستخدم هذا محجوز بالفعل. يرجى اختيار اسم آخر.</p>
+                    </div>
+                    
                     <button type="submit" class="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3 px-6 rounded-lg transition-transform transform hover:scale-105 shadow-lg">
                         إنشاء وحفظ الشهادة ورمز QR
                     </button>
@@ -121,7 +136,7 @@
                     <div class="md:col-span-2">
                         <h3 class="font-bold text-lg mb-2 text-gray-300">معاينة الشهادة:</h3>
                         <div id="certificate-preview" class="certificate p-6 rounded-lg text-white">
-                            </div>
+                        </div>
                     </div>
                     <div class="text-center glass-card p-4 rounded-lg">
                         <h3 class="font-bold text-lg mb-2 text-gray-300">رمز التحقق QR:</h3>
@@ -148,70 +163,124 @@
             </div>
         </div>
 
-        <div id="verifier-view" class="hidden">
+        <div id="student-cert-view" class="hidden">
              <div class="max-w-4xl mx-auto certificate p-8 sm:p-12 text-white">
-                 <div class="text-center mb-8">
-                     <div class="inline-block px-4 py-2 bg-green-900/50 text-green-300 font-semibold rounded-full border border-green-700">
-                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block ml-2" viewBox="0 0 20 20" fill="currentColor">
-                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                         </svg>
-                         شهادة معتمدة وموثوقة
-                     </div>
-                     <h1 id="verified-authority" class="text-4xl font-bold mt-4 text-cyan-400"></h1>
-                 </div>
+                <div class="text-center mb-8">
+                    <div class="inline-block px-4 py-2 bg-green-900/50 text-green-300 font-semibold rounded-full border border-green-700">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block ml-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                        </svg>
+                        شهادة رقمية معتمدة
+                    </div>
+                    <h1 id="student-verified-authority" class="text-4xl font-bold mt-4 text-cyan-400"></h1>
+                </div>
 
-                 <div class="text-center my-10">
-                     <p class="text-xl text-gray-300 mb-4">تشهد بأن</p>
-                     <h2 id="verified-studentName" class="text-5xl font-bold text-gray-200" style="color: #67e8f9;"></h2>
-                     <p class="text-xl text-gray-300 mt-4">قد منحت/مُنحت الدرجة العلمية في</p>
-                     <h3 id="verified-courseName" class="text-3xl font-semibold mt-2 text-cyan-500"></h3>
-                 </div>
+                <div class="text-center my-10">
+                    <p class="text-xl text-gray-300 mb-4">تشهد بأن</p>
+                    <h2 id="student-verified-studentName" class="text-5xl font-bold text-gray-200" style="color: #67e8f9;"></h2>
+                    <p class="text-xl text-gray-300 mt-4">قد منحت/مُنحت الدرجة العلمية في</p>
+                    <h3 id="student-verified-courseName" class="text-3xl font-semibold mt-2 text-cyan-500"></h3>
+                </div>
 
-                 <div class="flex justify-between items-center mt-12 pt-6 border-t-2 border-dashed border-gray-600">
-                     <div>
-                         <p class="font-semibold">تاريخ الإصدار:</p>
-                         <p id="verified-issueDate" class="text-gray-300"></p>
-                     </div>
-                     <div class="seal">الختم<br>الرقمي</div>
-                     <div>
-                         <p class="font-semibold">رقم الشهادة التعريفي:</p>
-                         <p id="certificate-id" class="text-gray-400 text-xs break-all"></p>
-                     </div>
-                 </div>
-                 <div class="text-center mt-8 p-4 glass-card mx-auto max-w-xs">
-                     <h3 class="font-bold text-lg mb-2 text-gray-300">رمز التحقق QR:</h3>
-                     <div id="verifier-qrcode" class="flex justify-center p-2 bg-white rounded-lg shadow-inner"></div>
-                 </div>
-             </div>
+                <div class="flex justify-between items-center mt-12 pt-6 border-t-2 border-dashed border-gray-600">
+                    <div>
+                        <p class="font-semibold">تاريخ الإصدار:</p>
+                        <p id="student-verified-issueDate" class="text-gray-300"></p>
+                    </div>
+                    <div class="seal">الختم<br>الرقمي</div>
+                    <div>
+                        <p class="font-semibold">تاريخ التحقق:</p>
+                        <p id="student-verification-time" class="text-gray-400 text-xs break-all"></p>
+                    </div>
+                </div>
+                <div class="text-center mt-8">
+                    <button id="student-logout-button" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition">
+                        تسجيل خروج
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="verifier-view" class="hidden">
+            <div class="max-w-4xl mx-auto certificate p-8 sm:p-12 text-white">
+                <div class="text-center mb-8">
+                    <div class="inline-block px-4 py-2 bg-green-900/50 text-green-300 font-semibold rounded-full border border-green-700">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block ml-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                        </svg>
+                        شهادة معتمدة وموثوقة
+                    </div>
+                    <h1 id="verified-authority" class="text-4xl font-bold mt-4 text-cyan-400"></h1>
+                </div>
+
+                <div class="text-center my-10">
+                    <p class="text-xl text-gray-300 mb-4">تشهد بأن</p>
+                    <h2 id="verified-studentName" class="text-5xl font-bold text-gray-200" style="color: #67e8f9;"></h2>
+                    <p class="text-xl text-gray-300 mt-4">قد منحت/مُنحت الدرجة العلمية في</p>
+                    <h3 id="verified-courseName" class="text-3xl font-semibold mt-2 text-cyan-500"></h3>
+                </div>
+
+                <div class="flex justify-between items-center mt-12 pt-6 border-t-2 border-dashed border-gray-600">
+                    <div>
+                        <p class="font-semibold">تاريخ الإصدار:</p>
+                        <p id="verified-issueDate" class="text-gray-300"></p>
+                    </div>
+                    <div class="seal">الختم<br>الرقمي</div>
+                    <div>
+                        <p class="font-semibold">رقم الشهادة التعريفي:</p>
+                        <p id="certificate-id" class="text-gray-400 text-xs break-all"></p>
+                    </div>
+                </div>
+                <div class="text-center mt-8 p-4 glass-card mx-auto max-w-xs">
+                    <h3 class="font-bold text-lg mb-2 text-gray-300">رمز التحقق QR:</h3>
+                    <div id="verifier-qrcode" class="flex justify-center p-2 bg-white rounded-lg shadow-inner"></div>
+                    <p class="mt-2 text-sm text-gray-400">هذا الرمز يعيد عرض هذه الصفحة للتحقق.</p>
+                </div>
+            </div>
         </div>
 
     </div>
 
     <script>
-        // ⭐️⭐️⭐️ التعديل (1): إعادة تعريف اسم المستودع ودالة بناء الرابط ⭐️⭐️⭐️
-        const REPOSITORY_NAME = 'QuickRoute'; 
+        // --------------------------------------------------------
+        // 💻 كود JavaScript (المنطق والوظائف)
+        // --------------------------------------------------------
         
-        // دالة مساعدة جديدة لبناء الرابط بشكل موثوق على GitHub Pages
+        /**
+         * تبني رابط التحقق لرمز QR بشكل صحيح، معالجة مشكلة المسار.
+         */
         function buildVerificationUrl(encodedData) {
             const origin = window.location.origin;
-            let basePath = '/';
+            let pathname = window.location.pathname;
 
-            if (REPOSITORY_NAME && REPOSITORY_NAME.trim() !== '') {
-                // نستخدم اسم المستودع كمسار أساسي
-                basePath = `/${REPOSITORY_NAME.trim()}/`;
+            // 1. تنظيف المسار لضمان أننا نشير إلى index.html في الموقع الصحيح
+            if (pathname.endsWith('/')) {
+                pathname += 'index.html';
+            } else if (!pathname.endsWith('index.html')) {
+                const lastSlash = pathname.lastIndexOf('/');
+                // إذا كان pathname هو شيء مثل /repo/ أو /folder/
+                if (lastSlash !== -1) {
+                    pathname = pathname.substring(0, lastSlash + 1) + 'index.html';
+                } else {
+                     // إذا كان pathname هو مجرد اسم ملف
+                    pathname = 'index.html'; 
+                }
             }
             
-            // الرابط الناتج سيكون: [origin]/[path]index.html?data=[encodedData]
-            return `${origin}${basePath}index.html?data=${encodedData}`;
+            // 2. ضمان بدء المسار بـ / (للرابط المطلق)
+            if (!pathname.startsWith('/')) {
+                pathname = '/' + pathname;
+            }
+            
+            // الرابط الناتج سيكون: [Origin][Path to index.html]?data=[EncodedData]
+            return `${origin}${pathname}?data=${encodedData}`;
         }
-        // --------------------------------------------------------
         
-        // --------------------------------------------------------
         // إعداد IndexedDB (قاعدة البيانات المحلية)
-        // --------------------------------------------------------
         const DB_NAME = 'QuickRouteDB';
-        const DB_VERSION = 1;
-        const STORE_NAME = 'certificates';
+        const DB_VERSION = 2; 
+        const CERT_STORE = 'certificates';
+        const USER_STORE = 'users'; 
         let db;
 
         function openDB() {
@@ -226,9 +295,16 @@
 
                 request.onupgradeneeded = function(event) {
                     const db = event.target.result;
-                    if (!db.objectStoreNames.contains(STORE_NAME)) {
-                        const store = db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+                    
+                    if (!db.objectStoreNames.contains(CERT_STORE)) {
+                        const store = db.createObjectStore(CERT_STORE, { keyPath: 'id' });
                         store.createIndex('encodedData', 'encodedData', { unique: true });
+                        store.createIndex('studentUsername', 'studentUsername', { unique: false }); 
+                    }
+                    
+                    if (!db.objectStoreNames.contains(USER_STORE)) {
+                        const userStore = db.createObjectStore(USER_STORE, { keyPath: 'username' });
+                        userStore.createIndex('username', 'username', { unique: true }); 
                     }
                 };
 
@@ -244,24 +320,23 @@
             });
         }
 
-        function transaction(mode) {
-            return db.transaction([STORE_NAME], mode).objectStore(STORE_NAME);
+        function transaction(storeName, mode) {
+            return db.transaction([storeName], mode).objectStore(storeName);
         }
 
         function decodeCertData(data) {
             try {
-                // فك التشفير: Base64 -> URI Decoded -> JSON Parse
+                // فك تشفير البيانات من Base64 ثم فك تشفير URI
                 const decodedJson = decodeURIComponent(escape(atob(data)));
                 return JSON.parse(decodedJson);
             } catch (e) {
-                console.error("Failed to decode data:", e);
                 return null;
             }
         }
         
         function encodeCertData(data) {
-            // التشفير: JSON Stringify -> URI Encode -> Base64
             const jsonString = JSON.stringify(data);
+            // تشفير URI ثم تشفير Base64
             return btoa(unescape(encodeURIComponent(jsonString)));
         }
 
@@ -272,16 +347,44 @@
             });
         }
         
-        // --------------------------------------------------------
-        // وظائف CRUD
-        // --------------------------------------------------------
+        // وظائف الوصول لقاعدة البيانات
+        async function saveUser(userData) {
+            await openDB();
+            return new Promise((resolve, reject) => {
+                const store = transaction(USER_STORE, 'readwrite');
+                const request = store.add(userData);
+                request.onsuccess = () => resolve(userData);
+                request.onerror = (e) => reject(e);
+            });
+        }
+
+        async function findUser(username) {
+            await openDB();
+            return new Promise((resolve, reject) => {
+                const store = transaction(USER_STORE, 'readonly');
+                const request = store.get(username);
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = (e) => reject(e);
+            });
+        }
+
+        async function getCertificateByUsername(username) {
+             await openDB();
+            return new Promise((resolve, reject) => {
+                const store = transaction(CERT_STORE, 'readonly');
+                const index = store.index('studentUsername');
+                const request = index.get(username);
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = (e) => reject(e);
+            });
+        }
 
         async function saveCertificate(data) {
             await openDB();
             return new Promise((resolve, reject) => {
                 data.id = generateUUID(); 
                 data.encodedData = encodeCertData(data);
-                const store = transaction('readwrite');
+                const store = transaction(CERT_STORE, 'readwrite');
                 const request = store.add(data);
                 request.onsuccess = () => resolve(data);
                 request.onerror = (e) => reject(e);
@@ -291,7 +394,7 @@
         async function getSavedCertificates() {
             await openDB();
             return new Promise((resolve, reject) => {
-                const store = transaction('readonly');
+                const store = transaction(CERT_STORE, 'readonly');
                 const request = store.getAll();
                 request.onsuccess = () => resolve(request.result);
                 request.onerror = (e) => reject(e);
@@ -299,37 +402,45 @@
         }
 
         window.deleteCertificate = async function(id) {
-            if (!confirm("هل أنت متأكد من حذف هذه الشهادة؟ لا يمكن التراجع عن هذا الإجراء.")) {
+            if (!confirm("هل أنت متأكد من حذف هذه الشهادة؟ سيتم حذف بيانات دخول الطالب المرتبطة أيضاً.")) {
                 return;
             }
             
             try {
                 await openDB();
-                const store = transaction('readwrite');
-                const request = store.delete(id);
+                const certStore = transaction(CERT_STORE, 'readwrite');
+                const certRequest = certStore.get(id);
 
-                request.onsuccess = () => {
-                    console.log(`Certificate ${id} deleted.`);
-                    renderSavedCertificates(); 
+                certRequest.onsuccess = async (event) => {
+                    const cert = event.target.result;
+                    if (cert && cert.studentUsername) {
+                        const deleteCertRequest = transaction(CERT_STORE, 'readwrite').delete(id);
+                        deleteCertRequest.onsuccess = () => console.log(`Certificate ${id} deleted.`);
+                        
+                        const deleteUserRequest = transaction(USER_STORE, 'readwrite').delete(cert.studentUsername);
+                        deleteUserRequest.onsuccess = () => console.log(`User ${cert.studentUsername} deleted.`);
+                        
+                        renderSavedCertificates();
+                    } else {
+                        alert("فشل في العثور على الشهادة أو بيانات المستخدم المرتبطة.");
+                    }
                 };
-                request.onerror = (e) => {
-                    console.error("Deletion failed:", e);
+                certRequest.onerror = (e) => {
                     alert("فشل في حذف الشهادة.");
                 };
+                
             } catch (e) {
-                console.error(e);
                 alert("فشل في الوصول لقاعدة البيانات.");
             }
         };
 
-        // --------------------------------------------------------
-        // وظائف إدارة العرض والتحكم
-        // --------------------------------------------------------
+        // إدارة واجهات العرض
         const views = {
             login: document.getElementById('login-view'),
             generator: document.getElementById('generator-view'),
             verifier: document.getElementById('verifier-view'),
-            savedCerts: document.getElementById('saved-certs-view')
+            savedCerts: document.getElementById('saved-certs-view'),
+            studentCert: document.getElementById('student-cert-view') 
         };
         
         function showView(viewName) {
@@ -337,39 +448,165 @@
             if (views[viewName]) {
                 views[viewName].classList.remove('hidden');
             }
+            document.getElementById('result-view')?.classList.add('hidden'); 
         }
         
-        // دالة معالجة تسجيل الخروج
-        document.getElementById('logout-button').addEventListener('click', function() {
+        // معالجة تسجيل الخروج (للمسؤول)
+        document.getElementById('logout-button')?.addEventListener('click', function() {
             sessionStorage.removeItem('loggedIn');
             showView('login');
         });
+        
+        // معالجة تسجيل الخروج (للطالب)
+        document.getElementById('student-logout-button')?.addEventListener('click', function() {
+            sessionStorage.removeItem('studentLoggedIn');
+            showView('login');
+        });
 
-        // 🔑 معالجة حدث إرسال نموذج تسجيل الدخول
-        document.getElementById('login-form').addEventListener('submit', function(event) {
+        // معالجة حدث إرسال نموذج تسجيل الدخول
+        document.getElementById('login-form').addEventListener('submit', async function(event) {
             event.preventDefault();
 
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             const loginError = document.getElementById('login-error');
+            
+            // بيانات المسؤول (لا يتم عرضها في الواجهة)
+            const ADMIN_USERNAME = 'admin'; 
+            const ADMIN_PASSWORD = 'password123';
 
-            const DEFAULT_USERNAME = 'admin'; 
-            const DEFAULT_PASSWORD = 'password123';
-
-            if (username === DEFAULT_USERNAME && password === DEFAULT_PASSWORD) {
-                // تسجيل دخول ناجح
-                sessionStorage.setItem('loggedIn', 'true'); // حفظ حالة التسجيل
+            if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+                sessionStorage.setItem('loggedIn', 'true');
+                sessionStorage.removeItem('studentLoggedIn');
                 showView('generator');
                 loginError.classList.add('hidden');
+                document.getElementById('certificate-form').reset();
             } else {
-                // خطأ في تسجيل الدخول
-                loginError.classList.remove('hidden');
+                const user = await findUser(username);
+                if (user && user.password === password) {
+                    sessionStorage.setItem('studentLoggedIn', username); 
+                    sessionStorage.removeItem('loggedIn');
+                    loginError.classList.add('hidden');
+                    await displayStudentCertificate(username); 
+                } else {
+                    loginError.classList.remove('hidden');
+                }
+            }
+        });
+        
+        // دالة عرض شهادة الطالب
+        async function displayStudentCertificate(username) {
+            try {
+                const cert = await getCertificateByUsername(username); 
+                if (!cert) {
+                    alert('حدث خطأ أثناء عرض الشهادة. يرجى التحقق من حفظ بياناتك مسبقاً.');
+                    sessionStorage.removeItem('studentLoggedIn');
+                    showView('login');
+                    return;
+                }
+
+                showView('studentCert');
+                document.title = `شهادة ${cert.studentName}`;
+                
+                document.getElementById('student-verified-authority').textContent = cert.issuingAuthority;
+                document.getElementById('student-verified-studentName').textContent = cert.studentName;
+                document.getElementById('student-verified-courseName').textContent = cert.courseName;
+                document.getElementById('student-verified-issueDate').textContent = new Date(cert.issueDate).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
+                document.getElementById('student-verification-time').textContent = new Date().toLocaleDateString('ar-EG') + ' - ' + new Date().toLocaleTimeString('ar-EG');
+
+            } catch (e) {
+                console.error("Failed to display student cert:", e);
+                alert("حدث خطأ أثناء عرض الشهادة. يرجى التحقق من حفظ بياناتك مسبقاً.");
+                sessionStorage.removeItem('studentLoggedIn');
+                showView('login');
+            }
+        }
+
+        // معالجة حدث إرسال نموذج إنشاء الشهادة (للمسؤول)
+        document.getElementById('certificate-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const studentName = document.getElementById('studentName').value;
+            const courseName = document.getElementById('courseName').value;
+            const issuingAuthority = document.getElementById('issuingAuthority').value;
+            const issueDate = document.getElementById('issueDate').value;
+            const studentUsername = document.getElementById('studentUsername').value.toLowerCase().trim();
+            const studentPassword = document.getElementById('studentPassword').value;
+            const userError = document.getElementById('student-user-error');
+            
+            userError.classList.add('hidden');
+
+            const existingUser = await findUser(studentUsername);
+            if (existingUser) {
+                 userError.classList.remove('hidden');
+                 alert('اسم المستخدم هذا محجوز بالفعل. يرجى اختيار اسم آخر.');
+                 return;
+            }
+
+            const certificateData = {
+                studentName,
+                courseName,
+                issuingAuthority,
+                issueDate,
+                studentUsername, 
+                creationTime: new Date().toISOString()
+            };
+            
+            const userData = {
+                username: studentUsername,
+                password: studentPassword,
+            };
+
+            try {
+                // 1. حفظ المستخدم (الطالب)
+                await saveUser(userData);
+                
+                // 2. حفظ الشهادة
+                const savedCert = await saveCertificate(certificateData);
+                const encodedData = savedCert.encodedData; 
+                
+                // 3. تحديث واجهة النتيجة
+                const verificationUrl = buildVerificationUrl(encodedData);
+
+                const resultView = document.getElementById('result-view');
+                resultView.classList.remove('hidden');
+
+                const previewContainer = document.getElementById('certificate-preview');
+                previewContainer.innerHTML = `
+                    <div class="text-center">
+                        <h4 class="text-xl font-bold text-cyan-400">${issuingAuthority}</h4>
+                        <p class="my-4">تشهد بأن</p>
+                        <h5 class="text-2xl font-bold text-cyan-200">${studentName}</h5>
+                        <p class="my-2">قد حصل/حصلت على <span class="font-semibold">${courseName}</span></p>
+                        <p class="text-sm">بتاريخ: ${new Date(issueDate).toLocaleDateString('ar-EG')}</p>
+                        <p class="text-xs mt-4 text-indigo-300">بيانات الدخول للطالب: <span class="font-mono">${studentUsername}</span> / <span class="font-mono">${studentPassword}</span></p>
+                    </div>
+                `;
+                
+                const qrcodeContainer = document.getElementById('qrcode');
+                qrcodeContainer.innerHTML = ''; // مسح الـ QR Code القديم
+                
+                // توليد الـ QR Code الجديد
+                QRCode.toCanvas(verificationUrl, { width: 200, errorCorrectionLevel: 'H', color: { dark: '#000000', light: '#FFFFFF' } }, function(error, canvas) {
+                    if (error) console.error(error);
+                    qrcodeContainer.appendChild(canvas);
+                    const downloadLink = document.getElementById('download-qr');
+                    downloadLink.href = canvas.toDataURL('image/png');
+                });
+                
+                document.getElementById('certificate-form').reset();
+                resultView.scrollIntoView({ behavior: 'smooth' });
+                alert(`تم إنشاء الشهادة وحساب الطالب بنجاح! اسم المستخدم: ${studentUsername}`);
+
+            } catch (e) {
+                alert("فشل في حفظ الشهادة أو المستخدم في قاعدة البيانات. يرجى التأكد من أن اسم المستخدم فريد وأن المتصفح يسمح بالحفظ.");
+                if (e.name === 'ConstraintError') {
+                    userError.classList.remove('hidden');
+                }
             }
         });
 
-        // --------------------------------------------------------
-        // وظيفة عرض الشهادات المحفوظة
-        // --------------------------------------------------------
+        // دالة عرض الشهادات المحفوظة (للمسؤول)
         async function renderSavedCertificates() {
             const listContainer = document.getElementById('saved-certs-list');
             const noCertsMessage = document.getElementById('no-certs-message');
@@ -388,18 +625,17 @@
 
                 certificates.forEach((cert) => {
                     const issueDate = new Date(cert.issueDate).toLocaleDateString('ar-EG');
+                    const verificationLink = buildVerificationUrl(cert.encodedData);
                     
                     const certElement = document.createElement('div');
                     certElement.className = 'bg-gray-800 p-4 rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center transition hover:bg-gray-700 space-y-3 sm:space-y-0';
                     
-                    // ⭐️ التعديل (2): استخدام دالة بناء الرابط الصحيحة لزر "عرض الشهادة" 
-                    const verificationLink = buildVerificationUrl(cert.encodedData);
-
                     certElement.innerHTML = `
                         <div>
                             <p class="font-bold text-lg text-cyan-300">${cert.studentName}</p>
                             <p class="text-sm text-gray-400">${cert.courseName} - ${cert.issuingAuthority}</p>
                             <p class="text-xs text-gray-500 mt-1">تاريخ الإصدار: ${issueDate}</p>
+                            <p class="text-xs text-indigo-400 mt-1">المستخدم: ${cert.studentUsername}</p>
                         </div>
                         <div class="flex space-x-2 space-x-reverse">
                             <a href="${verificationLink}" target="_blank" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded-lg transition inline-block text-sm">
@@ -414,87 +650,10 @@
                 });
             } catch (e) {
                 alert("فشل في تحميل الشهادات من قاعدة البيانات.");
-                console.error(e);
             }
         }
-        
-        // --------------------------------------------------------
-        // معالجات الأحداث للأزرار
-        // --------------------------------------------------------
-        
-        // تفعيل زر عرض الشهادات المحفوظة
-        document.getElementById('show-saved-certs').addEventListener('click', function() {
-            renderSavedCertificates(); // تحديث القائمة قبل العرض
-            showView('savedCerts');
-        });
 
-        // تفعيل زر العودة لإنشاء شهادة
-        document.getElementById('back-to-generator').addEventListener('click', function() {
-            showView('generator');
-        });
-
-
-        // --------------------------------------------------------
-        // معالجة حدث إرسال نموذج إنشاء الشهادة
-        // --------------------------------------------------------
-        document.getElementById('certificate-form').addEventListener('submit', async function(event) {
-            event.preventDefault();
-
-            const studentName = document.getElementById('studentName').value;
-            const courseName = document.getElementById('courseName').value;
-            const issuingAuthority = document.getElementById('issuingAuthority').value;
-            const issueDate = document.getElementById('issueDate').value;
-            
-            const certificateData = {
-                studentName,
-                courseName,
-                issuingAuthority,
-                issueDate,
-                creationTime: new Date().toISOString()
-            };
-
-            try {
-                const savedCert = await saveCertificate(certificateData);
-                const encodedData = savedCert.encodedData; 
-                
-                // ⭐️ التعديل (3): استخدام الدالة الجديدة لبناء الرابط الموثوق
-                const verificationUrl = buildVerificationUrl(encodedData);
-
-                const resultView = document.getElementById('result-view');
-                resultView.classList.remove('hidden');
-
-                const previewContainer = document.getElementById('certificate-preview');
-                previewContainer.innerHTML = `
-                    <div class="text-center">
-                        <h4 class="text-xl font-bold text-cyan-400">${issuingAuthority}</h4>
-                        <p class="my-4">تشهد بأن</p>
-                        <h5 class="text-2xl font-bold text-cyan-200">${studentName}</h5>
-                        <p class="my-2">قد حصل/حصلت على <span class="font-semibold">${courseName}</span></p>
-                        <p class="text-sm">بتاريخ: ${new Date(issueDate).toLocaleDateString('ar-EG')}</p>
-                    </div>
-                `;
-                
-                const qrcodeContainer = document.getElementById('qrcode');
-                qrcodeContainer.innerHTML = '';
-                // ⭐️ التعديل (4): زيادة حجم الرمز (200) واستخدام اللون الأسود النقي لتحسين القراءة
-                QRCode.toCanvas(verificationUrl, { width: 200, errorCorrectionLevel: 'H', color: { dark: '#000000', light: '#FFFFFF' } }, function(error, canvas) {
-                    if (error) console.error(error);
-                    qrcodeContainer.appendChild(canvas);
-                    const downloadLink = document.getElementById('download-qr');
-                    downloadLink.href = canvas.toDataURL('image/png');
-                });
-                
-                document.getElementById('certificate-form').reset();
-                resultView.scrollIntoView({ behavior: 'smooth' });
-            } catch (e) {
-                alert("فشل في حفظ الشهادة في قاعدة البيانات.");
-                console.error("Save failed:", e);
-            }
-        });
-
-        // --------------------------------------------------------
-        // وظيفة التهيئة عند تحميل الصفحة (الـ onload) - منطق التحقق والوصول
-        // --------------------------------------------------------
+        // التهيئة عند تحميل الصفحة
         window.onload = async function() {
             try {
                 await openDB();
@@ -504,17 +663,16 @@
             
             const urlParams = new URLSearchParams(window.location.search);
             const data = urlParams.get('data');
+            const studentUsername = sessionStorage.getItem('studentLoggedIn');
 
             if (data) {
-                // ⭐️ إذا كان هناك 'data' في الرابط (مسح QR): افتح واجهة التحقق مباشرة
+                // مسار التحقق العام (عبر QR Code)
                 showView('verifier');
                 
                 const certificateData = decodeCertData(data);
 
                 if (certificateData) {
-                    // ⭐️ التعديل (5): استخدام الدالة الجديدة لبناء الرابط الموثوق في واجهة التحقق
                     const verificationUrl = buildVerificationUrl(data);
-
                     document.title = `شهادة ${certificateData.studentName}`;
                     document.getElementById('verified-authority').textContent = certificateData.issuingAuthority;
                     document.getElementById('verified-studentName').textContent = certificateData.studentName;
@@ -524,7 +682,6 @@
 
                     const verifierQrcodeContainer = document.getElementById('verifier-qrcode');
                     verifierQrcodeContainer.innerHTML = '';
-                    // ⭐️ التعديل (6): زيادة حجم الرمز (200) واستخدام اللون الأسود النقي لتحسين القراءة
                     QRCode.toCanvas(verificationUrl, { width: 200, errorCorrectionLevel: 'H', color: { dark: '#000000', light: '#FFFFFF' } }, function(error, canvas) {
                         if (error) console.error(error);
                         verifierQrcodeContainer.appendChild(canvas);
@@ -535,13 +692,28 @@
                 }
 
             } else if (sessionStorage.getItem('loggedIn') === 'true') {
-                // إذا كان قد سجّل الدخول سابقاً (للمسؤول)
+                // مسار المسؤول
                 showView('generator');
+            } else if (studentUsername) {
+                 // مسار الطالب (بعد تسجيل الدخول)
+                await displayStudentCertificate(studentUsername);
             } else {
                 // الحالة الافتراضية: اذهب إلى صفحة تسجيل الدخول
                 showView('login');
             }
         };
+
+        // تفعيل زر عرض الشهادات المحفوظة
+        document.getElementById('show-saved-certs')?.addEventListener('click', function() {
+            renderSavedCertificates(); 
+            showView('savedCerts');
+        });
+
+        // تفعيل زر العودة لإنشاء شهادة
+        document.getElementById('back-to-generator')?.addEventListener('click', function() {
+            showView('generator');
+        });
+
     </script>
 </body>
 </html>
